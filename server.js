@@ -5,9 +5,11 @@
 const express = require('express');
 const cors = require('cors')
 const app = express();
+const bodyParser = require('body-parser')
 
 
-app.use(cors);
+app.use(cors());
+app.use(bodyParser.json());
 
 // bikin database
 const Datastore = require('nedb');
@@ -40,6 +42,7 @@ app.get('/', function(request, response) {
   response.send('ok')
 });
 
+//list berita
 app.get('/api/berita/', (req, res) => {
   
   db.find({}, function (err, docs) {
@@ -50,11 +53,27 @@ app.get('/api/berita/', (req, res) => {
 
 });
 
+//find detail berita
+app.get('/api/berita/:slug', (req, res) => {
+  
+  db.find({slug: req.params.slug}, function (err, docs) {
+    
+    res.send(docs)
+    
+  });
+
+});
+
+
+//insert data
 app.post('/api/berita/', (req, res) => {
   
+  //?nama=aria
+  console.log(req.query);
+
   const berita = {
-    "title": "Apa Tujuan Grab Bangun Laboratorium AI bersama NUS?",
-    "slug": "laboratorium-ai-grab-nus"
+    "title": req.body.title,
+    "slug": req.body.slug
   }
   
   db.insert(berita, (err, newDoc) => {
@@ -66,6 +85,35 @@ app.post('/api/berita/', (req, res) => {
     
     res.send(newDoc);
     
+  });
+  
+});
+
+// update data
+app.put('/api/berita/:slug', (req, res) => {
+  
+  //?nama=aria
+  console.log(req.query);
+
+  const berita = {
+    "title": req.query.title,
+    "slug": req.query.slug
+  }
+  
+  db.update({ slug: req.params.slug }, berita, {}, function (err, numReplaced) {
+
+    res.send('ok')
+  });
+  
+});
+
+
+//hapus berita
+app.delete('/api/berita/:slug', (req, res) => {
+  
+  db.remove({ slug: req.params.slug }, {}, function (err, numRemoved) {
+    
+    res.send('ok');
   });
   
 });
